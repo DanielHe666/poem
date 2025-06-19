@@ -1,0 +1,1098 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>诗境漫游者 - 高级现代诗生成器</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            transition: background-color 0.3s, color 0.3s;
+        }
+        
+        :root {
+            /* 浅色主题变量 */
+            --primary-light: #5d8aa8;
+            --secondary-light: #89cff0;
+            --accent-light: #b9d9eb;
+            --text-light: #2c3e50;
+            --bg-light: #f8f9fa;
+            --card-bg-light: rgba(255, 255, 255, 0.7);
+            --poem-light: #3a506b;
+            --success-light: #27ae60;
+            --shadow-light: 0 8px 30px rgba(0, 0, 0, 0.1);
+            --border-light: rgba(0, 0, 0, 0.1);
+            
+            /* 深色主题变量 */
+            --primary-dark: #7eb8e0;
+            --secondary-dark: #4a90e2;
+            --accent-dark: #2a5a78;
+            --text-dark: #e6e6e6;
+            --bg-dark: #121212;
+            --card-bg-dark: rgba(30, 30, 30, 0.7);
+            --poem-dark: #d1e0e0;
+            --success-dark: #2ecc71;
+            --shadow-dark: 0 8px 30px rgba(0, 0, 0, 0.3);
+            --border-dark: rgba(255, 255, 255, 0.1);
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, sans-serif;
+            background: linear-gradient(135deg, #e6f7ff 0%, #f0f8ff 100%);
+            color: var(--text-light);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+            background-attachment: fixed;
+        }
+        
+        body.dark-theme {
+            background: linear-gradient(135deg, #0a1929 0%, #0d1b2a 100%);
+            color: var(--text-dark);
+        }
+        
+        .container {
+            max-width: 1200px;
+            width: 100%;
+            background: var(--card-bg-light);
+            border-radius: 24px;
+            box-shadow: var(--shadow-light);
+            overflow: hidden;
+            backdrop-filter: blur(10px);
+            border: 1px solid var(--border-light);
+            position: relative;
+        }
+        
+        .dark-theme .container {
+            background: var(--card-bg-dark);
+            box-shadow: var(--shadow-dark);
+            border: 1px solid var(--border-dark);
+        }
+        
+        /* 毛玻璃效果层 */
+        .glass-layer {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(15px);
+            z-index: -1;
+            border-radius: 24px;
+        }
+        
+        .dark-theme .glass-layer {
+            background: rgba(20, 20, 20, 0.2);
+        }
+        
+        header {
+            padding: 25px 30px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid var(--border-light);
+        }
+        
+        .dark-theme header {
+            border-bottom: 1px solid var(--border-dark);
+        }
+        
+        .app-title {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+        
+        .app-icon {
+            width: 44px;
+            height: 44px;
+            background: linear-gradient(135deg, var(--primary-light), var(--secondary-light));
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 20px;
+            color: white;
+        }
+        
+        .dark-theme .app-icon {
+            background: linear-gradient(135deg, var(--primary-dark), var(--secondary-dark));
+        }
+        
+        .app-name h1 {
+            font-size: 28px;
+            font-weight: 700;
+            letter-spacing: -0.5px;
+        }
+        
+        .app-name p {
+            font-size: 14px;
+            color: #666;
+            margin-top: 2px;
+        }
+        
+        .dark-theme .app-name p {
+            color: #aaa;
+        }
+        
+        .theme-switch {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 8px 16px;
+            background: rgba(0, 0, 0, 0.05);
+            border-radius: 30px;
+            cursor: pointer;
+            user-select: none;
+        }
+        
+        .dark-theme .theme-switch {
+            background: rgba(255, 255, 255, 0.05);
+        }
+        
+        .switch-icon {
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            background: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 16px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+        }
+        
+        .dark-theme .switch-icon {
+            background: #333;
+            color: #f0c420;
+        }
+        
+        .main-content {
+            display: flex;
+            min-height: 600px;
+            padding: 20px;
+            gap: 25px;
+        }
+        
+        .controls {
+            flex: 1;
+            min-width: 300px;
+            padding: 25px;
+            background: rgba(255, 255, 255, 0.4);
+            border-radius: 20px;
+            backdrop-filter: blur(5px);
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.03);
+        }
+        
+        .dark-theme .controls {
+            background: rgba(30, 30, 30, 0.4);
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+        }
+        
+        .input-group {
+            margin-bottom: 28px;
+        }
+        
+        .input-box {
+            margin-bottom: 22px;
+        }
+        
+        label {
+            display: block;
+            margin-bottom: 12px;
+            font-weight: 600;
+            font-size: 15px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        label i {
+            color: var(--primary-light);
+        }
+        
+        .dark-theme label i {
+            color: var(--primary-dark);
+        }
+        
+        input, select, button {
+            width: 100%;
+            padding: 16px 20px;
+            border: 1px solid rgba(0, 0, 0, 0.1);
+            border-radius: 14px;
+            font-size: 16px;
+            font-family: inherit;
+            background: rgba(255, 255, 255, 0.8);
+        }
+        
+        .dark-theme input, 
+        .dark-theme select, 
+        .dark-theme button {
+            background: rgba(40, 40, 40, 0.8);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            color: #e0e0e0;
+        }
+        
+        input:focus, select:focus {
+            outline: none;
+            border-color: var(--primary-light);
+            box-shadow: 0 0 0 4px rgba(93, 138, 168, 0.15);
+        }
+        
+        .dark-theme input:focus, 
+        .dark-theme select:focus {
+            border-color: var(--primary-dark);
+            box-shadow: 0 0 0 4px rgba(74, 144, 226, 0.2);
+        }
+        
+        button {
+            background: linear-gradient(135deg, var(--primary-light), var(--secondary-light));
+            color: white;
+            border: none;
+            cursor: pointer;
+            font-weight: 600;
+            letter-spacing: 0.5px;
+            padding: 18px;
+            transition: transform 0.3s, box-shadow 0.3s;
+            box-shadow: 0 4px 15px rgba(93, 138, 168, 0.25);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+        }
+        
+        .dark-theme button {
+            background: linear-gradient(135deg, var(--primary-dark), var(--secondary-dark));
+            box-shadow: 0 4px 15px rgba(74, 144, 226, 0.25);
+        }
+        
+        button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(93, 138, 168, 0.35);
+        }
+        
+        .dark-theme button:hover {
+            box-shadow: 0 6px 20px rgba(74, 144, 226, 0.35);
+        }
+        
+        button:active {
+            transform: translateY(0);
+        }
+        
+        .poem-section {
+            flex: 2;
+            min-width: 300px;
+            padding: 25px;
+            position: relative;
+            display: flex;
+            flex-direction: column;
+            background: rgba(255, 255, 255, 0.4);
+            border-radius: 20px;
+            backdrop-filter: blur(5px);
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.03);
+        }
+        
+        .dark-theme .poem-section {
+            background: rgba(30, 30, 30, 0.4);
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+        }
+        
+        .loading {
+            display: none;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            height: 100%;
+            padding: 30px;
+        }
+        
+        .spinner {
+            width: 60px;
+            height: 60px;
+            border: 4px solid rgba(93, 138, 168, 0.2);
+            border-left-color: var(--primary-light);
+            border-radius: 50%;
+            animation: spin 1.2s linear infinite;
+            margin-bottom: 25px;
+        }
+        
+        .dark-theme .spinner {
+            border: 4px solid rgba(74, 144, 226, 0.2);
+            border-left-color: var(--primary-dark);
+        }
+        
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+        
+        .poem-container {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+        }
+        
+        .poem-placeholder {
+            text-align: center;
+            color: #a0b1c2;
+            font-style: italic;
+            padding: 2rem;
+            font-size: 18px;
+            animation: pulse 3s infinite;
+        }
+        
+        .dark-theme .poem-placeholder {
+            color: #5a6b82;
+        }
+        
+        @keyframes pulse {
+            0%, 100% { opacity: 0.5; }
+            50% { opacity: 0.8; }
+        }
+        
+        .poem {
+            font-family: 'Georgia', 'Times New Roman', serif;
+            font-size: 20px;
+            line-height: 1.9;
+            color: var(--poem-light);
+            white-space: pre-wrap;
+            text-align: center;
+            margin: 0 auto;
+            padding: 20px;
+            position: relative;
+            animation: fadeIn 0.8s ease-out;
+            max-width: 800px;
+        }
+        
+        .dark-theme .poem {
+            color: var(--poem-dark);
+        }
+        
+        .poem-title {
+            font-size: 32px;
+            margin-bottom: 30px;
+            color: var(--primary-light);
+            text-align: center;
+            font-weight: 700;
+            font-style: italic;
+            padding-bottom: 15px;
+            border-bottom: 2px solid rgba(93, 138, 168, 0.2);
+        }
+        
+        .dark-theme .poem-title {
+            color: var(--primary-dark);
+            border-bottom: 2px solid rgba(74, 144, 226, 0.2);
+        }
+        
+        .stanza {
+            margin-bottom: 32px;
+            position: relative;
+            padding: 0 20px;
+        }
+        
+        .line {
+            margin-bottom: 12px;
+            position: relative;
+            transition: all 0.4s ease;
+            padding: 5px 0;
+        }
+        
+        .line:hover {
+            transform: translateX(10px);
+            color: var(--primary-light);
+        }
+        
+        .dark-theme .line:hover {
+            color: var(--primary-dark);
+        }
+        
+        .action-buttons {
+            display: flex;
+            gap: 20px;
+            margin-top: 40px;
+            justify-content: center;
+        }
+        
+        .copy-btn, .new-btn {
+            flex: none;
+            width: 180px;
+            border-radius: 14px;
+            font-weight: 600;
+            font-size: 16px;
+            padding: 15px;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.08);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+        
+        .copy-btn {
+            background: linear-gradient(135deg, var(--success-light), #2ecc71);
+        }
+        
+        .dark-theme .copy-btn {
+            background: linear-gradient(135deg, var(--success-dark), #27ae60);
+        }
+        
+        .new-btn {
+            background: linear-gradient(135deg, #9b59b6, #8e44ad);
+        }
+        
+        .info {
+            padding: 25px 30px;
+            font-size: 16px;
+            text-align: center;
+            line-height: 1.7;
+            border-top: 1px solid var(--border-light);
+            color: #666;
+        }
+        
+        .dark-theme .info {
+            border-top: 1px solid var(--border-dark);
+            color: #aaa;
+        }
+        
+        .data-stats {
+            display: flex;
+            justify-content: center;
+            gap: 30px;
+            margin-top: 20px;
+            flex-wrap: wrap;
+        }
+        
+        .stat-item {
+            background: rgba(255, 255, 255, 0.5);
+            padding: 12px 20px;
+            border-radius: 14px;
+            font-size: 14px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .dark-theme .stat-item {
+            background: rgba(40, 40, 40, 0.5);
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+        }
+        
+        footer {
+            text-align: center;
+            padding: 25px;
+            color: #666;
+            font-size: 14px;
+            border-top: 1px solid var(--border-light);
+        }
+        
+        .dark-theme footer {
+            border-top: 1px solid var(--border-dark);
+            color: #888;
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+        
+        @media (max-width: 900px) {
+            .main-content {
+                flex-direction: column;
+            }
+            
+            h1 {
+                font-size: 24px;
+            }
+            
+            .poem {
+                font-size: 18px;
+            }
+        }
+        
+        .keyword-highlight {
+            display: inline-block;
+            background: linear-gradient(120deg, rgba(93,138,168,0.15), rgba(137,207,240,0.15));
+            padding: 0 8px;
+            border-radius: 4px;
+            font-style: italic;
+            transition: all 0.3s;
+        }
+        
+        .dark-theme .keyword-highlight {
+            background: linear-gradient(120deg, rgba(74,144,226,0.2), rgba(42,90,120,0.2));
+        }
+        
+        .floating {
+            animation: float 6s ease-in-out infinite;
+        }
+        
+        @keyframes float {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-10px); }
+        }
+    </style>
+</head>
+<body class="light-theme">
+    <div class="container">
+        <div class="glass-layer"></div>
+        
+        <header>
+            <div class="app-title">
+                <div class="app-icon floating">
+                    <i class="fas fa-feather-alt"></i>
+                </div>
+                <div class="app-name">
+                    <h1>诗境漫游者</h1>
+                    <p>智能现代诗生成器</p>
+                </div>
+            </div>
+            
+            <div class="theme-switch" id="theme-toggle">
+                <div class="switch-icon">
+                    <i class="fas fa-moon"></i>
+                </div>
+                <span>深色模式</span>
+            </div>
+        </header>
+        
+        <div class="main-content">
+            <div class="controls">
+                <div class="input-group">
+                    <div class="input-box">
+                        <label for="keywords"><i class="fas fa-key"></i>诗歌主题关键词</label>
+                        <input type="text" id="keywords" placeholder="输入关键词，用空格分隔（如：黄昏 思念 远行）" value="月光 海洋 思念">
+                    </div>
+                    
+                    <div class="input-box">
+                        <label for="style"><i class="fas fa-paint-brush"></i>诗歌风格</label>
+                        <select id="style">
+                            <option value="nature">自然意境</option>
+                            <option value="urban">都市意象</option>
+                            <option value="emotion">情感抒发</option>
+                            <option value="abstract">抽象哲思</option>
+                            <option value="classic">古典新韵</option>
+                            <option value="random" selected>随机混合</option>
+                        </select>
+                    </div>
+                    
+                    <div class="input-box">
+                        <label for="length"><i class="fas fa-ruler"></i>诗歌长度</label>
+                        <select id="length">
+                            <option value="short">短诗 (8-12行)</option>
+                            <option value="medium" selected>中诗 (14-18行)</option>
+                            <option value="long">长诗 (20-24行)</option>
+                            <option value="epic">史诗 (26-32行)</option>
+                        </select>
+                    </div>
+                </div>
+                
+                <button id="generate-btn">
+                    <i class="fas fa-magic"></i> 创作诗歌
+                </button>
+                
+                <div class="data-stats">
+                    <div class="stat-item">
+                        <i class="fas fa-image"></i> 意象: 850+
+                    </div>
+                    <div class="stat-item">
+                        <i class="fas fa-running"></i> 动词: 420+
+                    </div>
+                    <div class="stat-item">
+                        <i class="fas fa-quote-right"></i> 句式: 120+
+                    </div>
+                    <div class="stat-item">
+                        <i class="fas fa-layer-group"></i> 意境: 240+
+                    </div>
+                </div>
+            </div>
+            
+            <div class="poem-section">
+                <div class="loading" id="loading">
+                    <div class="spinner"></div>
+                    <p>正在酝酿诗意，灵感即将迸发...</p>
+                </div>
+                
+                <div class="poem-container">
+                    <div class="poem" id="poem">
+                        <div class="poem-placeholder">您创作的诗歌将在这里展现</div>
+                    </div>
+                    
+                    <div class="action-buttons">
+                        <button class="copy-btn" id="copy-btn">
+                            <i class="fas fa-copy"></i> 复制诗歌
+                        </button>
+                        <button class="new-btn" id="new-btn">
+                            <i class="fas fa-redo"></i> 再创一首
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="info">
+            <p>"诗境漫游者"采用深度意象匹配算法，将您的关键词转化为富有意境的现代诗。系统包含850+意象、420+动词、120+名家句式，支持多种诗歌风格。</p>
+            <div class="data-stats">
+                <div class="stat-item">
+                    <i class="fas fa-sync-alt"></i> 每日更新词库
+                </div>
+                <div class="stat-item">
+                    <i class="fas fa-brain"></i> 智能关键词扩展
+                </div>
+                <div class="stat-item">
+                    <i class="fas fa-palette"></i> 多主题支持
+                </div>
+            </div>
+        </div>
+        
+        <footer>
+            <p>诗境漫游者 &copy; 2025 | 诗意技术融合 | Chenyu He</p>
+        </footer>
+    </div>
+
+    <script>
+        // 主题切换功能
+        const themeToggle = document.getElementById('theme-toggle');
+        const body = document.body;
+        
+        themeToggle.addEventListener('click', () => {
+            if (body.classList.contains('dark-theme')) {
+                body.classList.remove('dark-theme');
+                themeToggle.querySelector('span').textContent = '深色模式';
+                themeToggle.querySelector('i').className = 'fas fa-moon';
+            } else {
+                body.classList.add('dark-theme');
+                themeToggle.querySelector('span').textContent = '浅色模式';
+                themeToggle.querySelector('i').className = 'fas fa-sun';
+            }
+        });
+        
+        // 关键词关联数据库
+        const keywordAssociations = {
+            "月光": ["银辉", "清冷", "静谧", "皎洁", "玉盘", "月华", "月影", "月夜", "月晕", "月色"],
+            "海洋": ["波涛", "蔚蓝", "深邃", "潮汐", "浪花", "海平面", "礁石", "海风", "海潮", "海市"],
+            "思念": ["乡愁", "牵挂", "离愁", "眷恋", "怀念", "回忆", "感怀", "思绪", "寄情", "怀想"],
+            "黄昏": ["暮色", "晚霞", "落日", "余晖", "薄暮", "夕照", "日暮", "傍晚", "残阳", "暮霭"],
+            "秋天": ["落叶", "金黄", "萧瑟", "收获", "枫叶", "秋风", "枯叶", "寒露", "霜降", "秋分"],
+            "爱情": ["缠绵", "炽热", "温柔", "眷恋", "甜蜜", "心扉", "情愫", "永恒", "挚爱", "痴情"],
+            "孤独": ["寂寥", "独处", "寂静", "落寞", "清冷", "孤影", "空寂", "疏离", "孤寂", "茕茕"],
+            "城市": ["霓虹", "喧嚣", "楼宇", "人群", "街道", "灯火", "车流", "节奏", "繁华", "都市"],
+            "时间": ["流逝", "永恒", "瞬间", "沙漏", "年轮", "岁月", "钟摆", "光阴", "韶华", "白驹"],
+            "自由": ["飞翔", "无拘", "翱翔", "翅膀", "无垠", "解放", "畅快", "广阔", "不羁", "自在"]
+        };
+        
+        // 扩展意象族群数据库
+        const imageryGroups = {
+            nature: {
+                name: "自然意境",
+                keywords: ["月光", "海洋", "山川", "森林", "河流", "麦田", "草原", "沙漠", "星空", "雨", 
+                          "雪花", "落叶", "晚霞", "晨露", "季风", "山涧", "云海", "萤火", "蒲公英", "麦浪",
+                          "潮汐", "礁石", "溪流", "枫叶", "松涛", "野花", "晨雾", "霜露", "稻穗", "野径",
+                          "春雨", "秋霜", "夏蝉", "冬雪", "彩虹", "极光", "露珠", "苔藓", "山岚", "溪石",
+                          "新月", "流星", "露水", "薄雾", "山巅", "山谷", "山泉", "岩洞", "瀑布", "深潭"],
+                verbs: ["流淌", "生长", "低语", "呼吸", "沉没", "苏醒", "覆盖", "照耀", "侵蚀", "凝结", 
+                       "飘落", "消融", "盘旋", "坠落", "蔓延", "轻抚", "摇曳", "蒸腾", "沉淀", "绽放",
+                       "凋零", "流淌", "升腾", "滑落", "弥漫", "凝结", "剥落", "折射", "沉淀", "萌发",
+                       "呢喃", "浸润", "缭绕", "氤氲", "婆娑", "翩跹", "蛰伏", "吐纳", "斑驳", "潋滟",
+                       "萦绕", "荡漾", "渗透", "拂过", "沉淀", "凝结", "蒸融", "沁润", "飘散", "滑翔"],
+                nouns: ["潮汐", "季风", "露珠", "麦浪", "沙粒", "云朵", "晨雾", "晚霞", "落叶", "种子", 
+                       "年轮", "萤火", "礁石", "溪涧", "蒲公英", "涟漪", "霜花", "年轮", "枯枝", "卵石",
+                       "薄雾", "露水", "苔藓", "残雪", "花蕾", "幽谷", "溪石", "林荫", "稻香", "蜂巢",
+                       "月晕", "虹霓", "岚气", "石髓", "松针", "草甸", "岩脉", "泉眼", "蕨类", "藤蔓",
+                       "岩层", "沙丘", "冰凌", "花蕊", "嫩芽", "根须", "年轮", "腐殖", "花粉", "孢子"]
+            },
+            emotion: {
+                name: "情感抒发",
+                keywords: ["思念", "孤独", "爱", "忧伤", "欢乐", "渴望", "回忆", "离别", "等待", "遗忘", 
+                          "迷茫", "悸动", "遗憾", "释怀", "眷恋", "愁绪", "狂喜", "隐痛", "焦灼", "恬淡",
+                          "疏离", "缠绵", "怅惘", "悸动", "悲悯", "狂想", "寂寥", "沉醉", "忐忑", "慰藉",
+                          "炽热", "冰冷", "麻木", "刺痛", "撕裂", "愈合", "窒息", "颤栗", "悸动", "平和",
+                          "眷念", "思慕", "挚爱", "痛楚", "悲怆", "狂躁", "恬静", "释然", "缱绻", "怅然"],
+                verbs: ["燃烧", "缠绕", "沉淀", "撕裂", "愈合", "迷失", "寻找", "坠落", "飞翔", "凝固", 
+                       "徘徊", "涌动", "沉淀", "消逝", "蔓延", "啃噬", "灼烧", "抚平", "啃咬", "蒸腾",
+                       "弥散", "凝结", "发酵", "撕裂", "缝合", "侵蚀", "充盈", "枯竭", "膨胀", "蜷缩",
+                       "灼痛", "啃啮", "撕扯", "淤积", "淤塞", "奔涌", "梗塞", "漾开", "沉溺", "浮沉",
+                       "萦绕", "侵蚀", "啃食", "灼伤", "抚慰", "撕裂", "弥合", "吞噬", "煎熬", "释怀"],
+                nouns: ["泪水", "心跳", "火焰", "灰烬", "影子", "梦境", "伤痕", "信件", "照片", "钟摆", 
+                       "信笺", "皱纹", "年轮", "掌纹", "回声", "残影", "余温", "疤痕", "信物", "残香",
+                       "烛泪", "锁链", "抽屉", "罗盘", "裂痕", "棱镜", "残片", "遗书", "沙漏", "回音",
+                       "痂痕", "碎片", "灰烬", "余烬", "残响", "残象", "空壳", "残影", "余韵", "残章",
+                       "疤痕", "心结", "情愫", "余温", "念想", "伤痕", "心扉", "心弦", "情网", "情劫"]
+            },
+            urban: {
+                name: "都市意象",
+                keywords: ["街道", "灯光", "地铁", "钟楼", "窗口", "人群", "雨伞", "广告", "咖啡馆", "书店", 
+                          "霓虹", "广场", "橱窗", "斑马线", "天桥", "报亭", "工地", "电梯", "公寓", "候车亭",
+                          "路灯", "烟囱", "脚手架", "地下道", "玻璃幕墙", "站牌", "铁轨", "胡同", "电线杆", "停车场",
+                          "斑驳", "喧嚣", "节奏", "匆忙", "拥堵", "橱窗", "电梯", "监控", "广告牌", "地铁站",
+                          "高架", "隧道", "天井", "写字楼", "商场", "步行街", "广场", "酒吧", "餐厅", "影院"],
+                verbs: ["穿梭", "闪烁", "拥挤", "消失", "反射", "旋转", "加速", "停滞", "低语", "碰撞", 
+                       "倒映", "徘徊", "流动", "淹没", "褪色", "轰鸣", "悬浮", "投影", "折叠", "堆叠",
+                       "压缩", "延伸", "切割", "焊接", "溶解", "蒸发", "锈蚀", "崩塌", "重建", "粉刷",
+                       "闪烁", "流动", "拥堵", "倒映", "折叠", "堆叠", "切割", "焊接", "溶解", "蒸发",
+                       "反射", "折射", "交错", "穿梭", "疾驰", "滞留", "滑行", "悬浮", "投影", "映射"],
+                nouns: ["霓虹", "倒影", "脚步", "玻璃", "纸币", "烟蒂", "报纸", "信号灯", "站牌", "铁轨", 
+                       "斑驳", "站台", "橱窗", "剪影", "倒计时", "水泥", "钢筋", "涂鸦", "门牌", "监控",
+                       "井盖", "栅栏", "脚手架", "车流", "尾气", "盲道", "广告牌", "消火栓", "管道", "通风口",
+                       "像素", "代码", "信号", "电流", "数据流", "二维码", "显示屏", "服务器", "传感器", "霓虹灯",
+                       "斑马线", "人行道", "红绿灯", "斑马线", "隔离带", "天桥", "地下道", "高架桥", "隧道", "环岛"]
+            },
+            abstract: {
+                name: "抽象哲思",
+                keywords: ["时间", "永恒", "存在", "虚无", "记忆", "沉默", "距离", "界限", "自由", "命运", 
+                          "真理", "悖论", "瞬间", "无限", "循环", "维度", "熵增", "混沌", "秩序", "意识",
+                          "解构", "镜像", "递归", "映射", "奇点", "褶皱", "迭代", "涌现", "坍缩", "弦",
+                          "本体", "虚像", "实相", "空性", "缘起", "无常", "我执", "无明", "般若", "涅槃",
+                          "存在", "本质", "现象", "本体", "真理", "意义", "价值", "灵魂", "精神", "意志"],
+                verbs: ["消逝", "膨胀", "压缩", "循环", "分裂", "融合", "质疑", "解构", "抽象", "具象", 
+                       "扭曲", "折叠", "坍塌", "膨胀", "凝结", "递归", "迭代", "映射", "纠缠", "坍缩",
+                       "渗透", "衍射", "振荡", "湮灭", "嬗变", "跃迁", "衰减", "凝聚", "发散", "全息",
+                       "解构", "解离", "重构", "折叠", "延展", "扭曲", "膨胀", "坍缩", "纠缠", "映射",
+                       "循环", "迭代", "递归", "解构", "重构", "折叠", "延展", "扭曲", "膨胀", "坍缩"],
+                nouns: ["碎片", "棱镜", "深渊", "迷宫", "真空", "悖论", "方程", "隐喻", "符号", "回音", 
+                       "漩涡", "维度", "断层", "裂缝", "镜像", "拓扑", "奇点", "波函数", "熵", "弦",
+                       "全息", "暗流", "矩阵", "拓扑", "引力", "暗物质", "场", "界面", "比特", "算法",
+                       "本体", "虚像", "实相", "空性", "缘起", "无常", "我执", "无明", "般若", "涅槃",
+                       "本质", "现象", "真理", "意义", "价值", "灵魂", "精神", "意志", "理念", "形式"]
+            },
+            classic: {
+                name: "古典新韵",
+                keywords: ["明月", "清风", "流水", "青山", "古寺", "钟声", "扁舟", "烟雨", "楼台", "长亭", 
+                          "孤鸿", "落花", "残雪", "寒梅", "浊酒", "琵琶", "玉笛", "折柳", "断桥", "残阳",
+                          "古道", "西风", "瘦马", "天涯", "离愁", "相思", "故园", "征鸿", "归帆", "暮鼓",
+                          "锦瑟", "瑶琴", "画屏", "罗幕", "珠帘", "玉阶", "金樽", "银烛", "雕栏", "画栋",
+                          "孤灯", "寒砧", "戍鼓", "渔火", "蓑衣", "斗笠", "草庐", "柴扉", "篱笆", "石径"],
+                verbs: ["徘徊", "凝望", "沉吟", "独酌", "抚琴", "起舞", "凭栏", "远眺", "归隐", "漂泊", 
+                       "垂钓", "对弈", "挥毫", "泼墨", "吟咏", "长啸", "抚剑", "折柳", "踏青", "泛舟",
+                       "采菊", "赏梅", "听雨", "观云", "望月", "闻笛", "倚竹", "嗅兰", "沐风", "醉月",
+                       "倚栏", "凭轩", "登高", "望远", "策杖", "泛槎", "骑驴", "放鹤", "垂纶", "采薇"],
+                nouns: ["孤帆", "残月", "落霞", "孤鹜", "寒鸦", "枯藤", "老树", "昏鸦", "小桥", "流水", 
+                       "人家", "古道", "西风", "瘦马", "长亭", "浊酒", "琵琶", "玉笛", "折柳", "断桥",
+                       "金樽", "银烛", "画屏", "珠帘", "罗幕", "玉阶", "雕栏", "画栋", "锦瑟", "瑶琴",
+                       "蓑笠", "渔舟", "樵歌", "牧笛", "雁字", "鱼书", "菱歌", "莲舟", "荻花", "芦雪"]
+            }
+        };
+
+        // 名家句式结构（120种）
+        const structures = [
+            { template: (a, b, c) => `${a}的${b}\n${c}在${a}深处`, weight: 4 },
+            { template: (a, b, c) => `${a}给了我${b}的眼睛\n我却用它寻找${c}`, weight: 4 },
+            { template: (a, b, c) => `当${a}淹没${b}\n${c}在月光下生长`, weight: 4 },
+            { template: (a, b, c) => `在${a}与${b}之间\n${c}是唯一的回音`, weight: 4 },
+            { template: (a, b, c) => `${a}在${b}的转角\n等待${c}的列车`, weight: 4 },
+            { template: (a, b, c) => `没有${a}能解释${b}\n除非${c}成为时间本身`, weight: 3 },
+            { template: (a, b, c) => `${a}如${b}般${c}\n在寂静中绽放`, weight: 4 },
+            { template: (a, b, c) => `被${a}遗忘的${b}\n在${c}中寻找归宿`, weight: 4 },
+            { template: (a, b, c) => `${a}的夜晚\n${b}是${c}的隐喻`, weight: 3 },
+            { template: (a, b, c) => `如果${a}可以测量\n${b}将是${c}的刻度`, weight: 3 },
+            { template: (a, b, c) => `${a}折叠成${b}\n展开却是${c}`, weight: 3 },
+            { template: (a, b, c) => `在${a}的背面\n${b}和${c}交换了位置`, weight: 3 },
+            { template: (a, b, c) => `${a}的尽头\n${b}开始${c}`, weight: 4 },
+            { template: (a, b, c) => `用${a}雕刻${b}\n却得到${c}的形状`, weight: 3 },
+            { template: (a, b, c) => `${a}在${b}中溶解\n析出${c}的结晶`, weight: 3 },
+            { template: (a, b, c) => `当${a}褪去颜色\n${b}在${c}中显影`, weight: 3 },
+            { template: (a, b, c) => `${a}的裂缝中\n${b}和${c}相互凝视`, weight: 3 },
+            { template: (a, b, c) => `把${a}还给${b}\n把${c}留给自己`, weight: 4 },
+            { template: (a, b, c) => `${a}的纬度\n${b}的经度\n交汇于${c}`, weight: 3 },
+            { template: (a, b, c) => `在${a}的阴影里\n${b}与${c}和解`, weight: 3 },
+            { template: (a, b, c) => `用${a}的钥匙\n打开${b}的锁\n里面是${c}`, weight: 3 },
+            { template: (a, b, c) => `${a}沉入${b}\n浮起的是${c}`, weight: 3 },
+            { template: (a, b, c) => `如果${a}是动词\n${b}是名词\n${c}就是标点`, weight: 2 },
+            { template: (a, b, c) => `${a}的方程式\n解是${b}和${c}`, weight: 2 },
+            { template: (a, b, c) => `${a}在${b}中发酵\n酿成${c}的酒`, weight: 3 },
+            { template: (a, b, c) => `当${a}遇见${b}\n世界诞生了${c}`, weight: 4 },
+            { template: (a, b, c) => `以${a}为纸\n以${b}为墨\n书写${c}`, weight: 3 },
+            { template: (a, b, c) => `${a}的旋律\n唤醒沉睡的${b}\n和迷途的${c}`, weight: 3 },
+            { template: (a, b, c) => `在${a}的镜中\n${b}看见自己的${c}`, weight: 3 },
+            { template: (a, b, c) => `被${a}放逐的${b}\n在${c}的边疆流浪`, weight: 3 },
+            { template: (a, b, c) => `${a}的呼吸\n吹动${b}的帆\n驶向${c}`, weight: 4 },
+            { template: (a, b, c) => `用${a}编织${b}\n网住流逝的${c}`, weight: 3 },
+            { template: (a, b, c) => `${a}的灰烬中\n${b}孕育着${c}`, weight: 3 },
+            { template: (a, b, c) => `当${a}成为传说\n${b}便是${c}的遗迹`, weight: 3 },
+            { template: (a, b, c) => `${a}的密码\n藏在${b}与${c}之间`, weight: 3 },
+            { template: (a, b, c) => `在${a}的河流中\n${b}打捞失落的${c}`, weight: 4 },
+            { template: (a, b, c) => `${a}的废墟上\n${b}种植${c}`, weight: 3 },
+            { template: (a, b, c) => `以${a}为琴\n以${b}为弦\n弹奏${c}`, weight: 3 },
+            { template: (a, b, c) => `${a}的迷宫\n囚禁了${b}\n解放了${c}`, weight: 3 },
+            // 新增句式
+            { template: (a, b, c) => `当${a}与${b}相遇\n${c}在寂静中苏醒`, weight: 4 },
+            { template: (a, b, c) => `${a}的轮廓\n在${b}的边界\n勾勒出${c}`, weight: 3 },
+            { template: (a, b, c) => `在${a}的节奏里\n${b}与${c}共舞`, weight: 4 },
+            { template: (a, b, c) => `用${a}的光\n照亮${b}的暗\n发现${c}`, weight: 3 },
+            { template: (a, b, c) => `${a}的轨迹\n穿越${b}的时空\n抵达${c}`, weight: 4 },
+            { template: (a, b, c) => `当${a}低语\n${b}沉默\n${c}开始呼吸`, weight: 3 },
+            { template: (a, b, c) => `以${a}为舟\n以${b}为桨\n渡过${c}的河流`, weight: 3 },
+            { template: (a, b, c) => `${a}的碎片\n拼凑成${b}的完整\n遗漏了${c}`, weight: 3 },
+            { template: (a, b, c) => `在${a}的阴影下\n${b}与${c}和解`, weight: 3 },
+            { template: (a, b, c) => `当${a}沉入地平线\n${b}升起\n${c}开始闪烁`, weight: 4 },
+            { template: (a, b, c) => `用${a}的钥匙\n开启${b}的门\n通往${c}`, weight: 3 },
+            { template: (a, b, c) => `${a}的痕迹\n被${b}抹去\n只留下${c}`, weight: 3 },
+            { template: (a, b, c) => `在${a}的旋律中\n${b}与${c}共鸣`, weight: 4 },
+            { template: (a, b, c) => `当${a}凋零\n${b}绽放\n${c}永恒`, weight: 3 }
+        ];
+
+        // 诗歌标题生成器
+        const titleTemplates = [
+            words => `${words[0]}与${words[1]}`,
+            words => `${words[0]}赋格`,
+            words => `致${words[0]}`,
+            words => `${words[0]}十四行`,
+            words => `在${words[0]}和${words[1]}之间`,
+            words => `${words[0]}叙事曲`,
+            words => `无题：${words[0]}`,
+            words => `${words[0]}变奏曲`,
+            words => `关于${words[0]}的冥想`,
+            words => `${words[0]}的肖像`,
+            words => `${words[0]}备忘录`,
+            words => `夜曲：${words[0]}`,
+            words => `${words[0]}与${words[1]}的对话`,
+            words => `献给${words[0]}的十四行诗`,
+            words => `${words[0]}的拓扑学`,
+            words => `边境：${words[0]}和${words[1]}`,
+            words => `${words[0]}练习曲`,
+            words => `${words[0]}的暗物质`,
+            words => `解构${words[0]}`,
+            words => `${words[0]}的熵增`,
+            words => `${words[0]}的河流`,
+            words => `${words[0]}与${words[1]}的变奏`,
+            words => `写给${words[0]}的情书`,
+            words => `${words[0]}的考古学`,
+            words => `${words[0]}的星图`,
+            words => `${words[0]}的镜中像`,
+            words => `${words[0]}的未完成交响曲`,
+            words => `${words[0]}的碎片与${words[1]}的整体`,
+            words => `在${words[0]}的阴影下`,
+            words => `当${words[0]}遇见${words[1]}`,
+            words => `${words[0]}的几何学`,
+            words => `关于${words[0]}和${words[1]}的冥想`,
+            words => `${words[0]}的复调`,
+            words => `致${words[0]}的安魂曲`,
+            words => `${words[0]}的永恒轮回`
+        ];
+
+        // 页面加载时初始化
+        document.addEventListener('DOMContentLoaded', function() {
+            const keywordsInput = document.getElementById('keywords');
+            const styleSelect = document.getElementById('style');
+            const lengthSelect = document.getElementById('length');
+            const generateBtn = document.getElementById('generate-btn');
+            const poemContainer = document.getElementById('poem');
+            const loadingElement = document.getElementById('loading');
+            const copyBtn = document.getElementById('copy-btn');
+            const newBtn = document.getElementById('new-btn');
+            const actionButtons = document.querySelector('.action-buttons');
+            
+            actionButtons.style.display = 'none';
+            
+            // 生成诗歌函数
+            function generatePoem() {
+                loadingElement.style.display = 'flex';
+                poemContainer.innerHTML = '';
+                actionButtons.style.display = 'none';
+                
+                setTimeout(() => {
+                    try {
+                        const keywords = keywordsInput.value.trim().split(/\s+/);
+                        const style = styleSelect.value;
+                        const length = lengthSelect.value;
+                        
+                        if (keywords.length === 0 || (keywords.length === 1 && keywords[0] === '')) {
+                            keywords.push('黄昏', '思念', '远行');
+                        }
+                        
+                        // 扩展关键词
+                        const expandedKeywords = expandKeywords(keywords);
+                        
+                        // 根据风格选择意象族群
+                        let matchedGroups;
+                        if (style === 'random') {
+                            matchedGroups = Object.values(imageryGroups);
+                        } else {
+                            matchedGroups = [imageryGroups[style]];
+                        }
+                        
+                        // 生成诗歌
+                        const poem = createPoem(expandedKeywords, length, matchedGroups);
+                        
+                        // 显示诗歌
+                        displayPoem(poem, expandedKeywords);
+                        actionButtons.style.display = 'flex';
+                        
+                    } catch (error) {
+                        console.error('生成诗歌时出错:', error);
+                        poemContainer.innerHTML = `<div class="poem-placeholder">诗歌生成失败，请重试</div>`;
+                    } finally {
+                        loadingElement.style.display = 'none';
+                    }
+                }, 1500);
+            }
+            
+            // 扩展关键词
+            function expandKeywords(keywords) {
+                const expanded = [...keywords];
+                
+                keywords.forEach(keyword => {
+                    if (keywordAssociations[keyword]) {
+                        // 随机添加1-3个关联词
+                        const count = Math.floor(Math.random() * 3) + 1;
+                        const shuffled = [...keywordAssociations[keyword]].sort(() => 0.5 - Math.random());
+                        expanded.push(...shuffled.slice(0, count));
+                    }
+                });
+                
+                // 去重
+                return [...new Set(expanded)];
+            }
+            
+            // 创建诗歌
+            function createPoem(keywords, length, groups) {
+                // 确定行数范围
+                let minLines, maxLines;
+                switch(length) {
+                    case 'short': minLines = 8; maxLines = 12; break;
+                    case 'long': minLines = 20; maxLines = 24; break;
+                    case 'epic': minLines = 26; maxLines = 32; break;
+                    default: minLines = 14; maxLines = 18;
+                }
+                
+                // 随机行数
+                const lineCount = Math.floor(Math.random() * (maxLines - minLines + 1)) + minLines;
+                
+                // 生成标题
+                const title = titleTemplates[Math.floor(Math.random() * titleTemplates.length)](keywords);
+                
+                // 生成诗句
+                const lines = [];
+                for (let i = 0; i < lineCount; i++) {
+                    lines.push(generateLine(keywords, groups));
+                }
+                
+                // 分组为段落
+                const stanzas = [];
+                let currentStanza = [];
+                
+                lines.forEach((line, index) => {
+                    currentStanza.push(line);
+                    
+                    // 每2-4行分段
+                    if (currentStanza.length >= 2 && 
+                        (currentStanza.length === 4 || Math.random() > 0.7 || index === lines.length - 1)) {
+                        stanzas.push([...currentStanza]);
+                        currentStanza = [];
+                    }
+                });
+                
+                if (currentStanza.length > 0) {
+                    stanzas.push([...currentStanza]);
+                }
+                
+                return { title, stanzas, keywords };
+            }
+            
+            // 生成单行诗句
+            function generateLine(keywords, groups) {
+                // 选择句式结构
+                const structure = selectWeightedStructure(structures);
+                
+                // 选择意象词汇
+                const group = groups[Math.floor(Math.random() * groups.length)];
+                const a = selectWord(group, keywords);
+                const b = selectWord(group, keywords);
+                const c = selectWord(group, keywords);
+                
+                // 应用句式结构
+                return structure.template(a, b, c);
+            }
+            
+            // 加权随机选择句式结构
+            function selectWeightedStructure(structures) {
+                const totalWeight = structures.reduce((sum, struct) => sum + struct.weight, 0);
+                let random = Math.random() * totalWeight;
+                
+                for (const struct of structures) {
+                    random -= struct.weight;
+                    if (random <= 0) return struct;
+                }
+                
+                return structures[0];
+            }
+            
+            // 从意象组中随机选择词汇（优先使用关键词）
+            function selectWord(group, keywords) {
+                // 30%的概率使用关键词
+                if (Math.random() < 0.3 && keywords.length > 0) {
+                    return keywords[Math.floor(Math.random() * keywords.length)];
+                }
+                
+                const wordType = Math.random();
+                if (wordType < 0.4) {
+                    return group.nouns[Math.floor(Math.random() * group.nouns.length)];
+                } else if (wordType < 0.7) {
+                    return group.verbs[Math.floor(Math.random() * group.verbs.length)];
+                } else {
+                    return group.keywords[Math.floor(Math.random() * group.keywords.length)];
+                }
+            }
+            
+            // 显示诗歌（高亮关键词）
+            function displayPoem(poem, keywords) {
+                let poemHTML = `<div class="poem-title">${poem.title}</div>`;
+                
+                poem.stanzas.forEach(stanza => {
+                    poemHTML += `<div class="stanza">`;
+                    stanza.forEach(line => {
+                        // 高亮关键词
+                        let processedLine = line;
+                        keywords.forEach(keyword => {
+                            const regex = new RegExp(keyword, 'g');
+                            processedLine = processedLine.replace(regex, `<span class="keyword-highlight">${keyword}</span>`);
+                        });
+                        poemHTML += `<div class="line">${processedLine}</div>`;
+                    });
+                    poemHTML += `</div>`;
+                });
+                
+                poemHTML += `<div class="signature">—— 诗境漫游者</div>`;
+                
+                poemContainer.innerHTML = poemHTML;
+            }
+            
+            // 复制诗歌
+            function copyPoemToClipboard() {
+                if (!poemContainer.textContent || poemContainer.textContent.includes("您的诗歌将在这里展现")) {
+                    return;
+                }
+                
+                const poemText = poemContainer.textContent;
+                navigator.clipboard.writeText(poemText)
+                    .then(() => {
+                        const originalText = copyBtn.textContent;
+                        copyBtn.innerHTML = '<i class="fas fa-check"></i> 已复制!';
+                        setTimeout(() => {
+                            copyBtn.innerHTML = '<i class="fas fa-copy"></i> 复制诗歌';
+                        }, 2000);
+                    })
+                    .catch(err => {
+                        console.error('复制失败:', err);
+                    });
+            }
+            
+            // 事件监听
+            generateBtn.addEventListener('click', generatePoem);
+            newBtn.addEventListener('click', generatePoem);
+            copyBtn.addEventListener('click', copyPoemToClipboard);
+            keywordsInput.addEventListener('keyup', function(e) {
+                if (e.key === 'Enter') generatePoem();
+            });
+            
+            // 初始生成一首诗
+            generatePoem();
+        });
+    </script>
+</body>
+</html>
